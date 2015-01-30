@@ -37,14 +37,14 @@ func main() {
 }
 
 func getWeather(w http.ResponseWriter, r *http.Request) {
-	d := make(chan weatherData)
+	d := make(chan weatherData, 2) //Setting the buffer to 2
 	e := make(chan error)
 	go func() {
 		data, err := query("spotsylvania")
 		if err != nil {
 			e <- err
 		}
-		d <- data
+		d <- data //Collecting from channel after getting only one value in the channel
 	}()
 	data := <-d
 	w.Write([]byte(fmt.Sprintf("%+v", data)))
