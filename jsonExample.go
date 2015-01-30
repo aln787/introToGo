@@ -7,6 +7,12 @@
 // `curl -s http://api.openweathermap.org/data/2.5/weather?q=spotsylvania | gojson`
 // gojson repo `https://github.com/ChimeraCoder/gojson.git`
 
+////Next steps
+//difference between Printf and Sprintf
+//Accessing values in the data structure
+//move query to a function to prep for goroutine
+//return values for each stage
+
 package main
 
 import (
@@ -31,26 +37,14 @@ func main() {
 }
 
 func getWeather(w http.ResponseWriter, r *http.Request) {
-	//locations := [5]{"spotsylvania", "washington", "chicago", "san francisco", "new york"}
 	res, err := http.Get("http://api.openweathermap.org/data/2.5/weather?q=spotsylvania")
 	if err != nil {
 		panic(err)
-		//return weatherData{}, err
 	}
 	defer res.Body.Close()
 	var d weatherData
 	if err := json.NewDecoder(res.Body).Decode(&d); err != nil {
 		panic(err)
-		//return weatherData{}, err
 	}
-
 	w.Write([]byte(fmt.Sprintf("%+v", d)))
-	//return d, nil
-
-	//fmt.Printf("%+v\n", d)
-	//fmt.Printf("openWeatherMap: %.2f\n", d.Main.Temp)
-}
-
-func query(city string) (weatherData, error) {
-
 }
