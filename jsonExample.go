@@ -37,14 +37,22 @@ func main() {
 }
 
 func getWeather(w http.ResponseWriter, r *http.Request) {
-	res, err := http.Get("http://api.openweathermap.org/data/2.5/weather?q=spotsylvania")
+	data, err := query("spotsylvania")
 	if err != nil {
 		panic(err)
+	}
+	w.Write([]byte(fmt.Sprintf("%+v", data)))
+}
+
+func query(city string) (weatherData, error) {
+	res, err := http.Get("http://api.openweathermap.org/data/2.5/weather?q=" + city)
+	if err != nil {
+		return weatherData{}, err
 	}
 	defer res.Body.Close()
 	var d weatherData
 	if err := json.NewDecoder(res.Body).Decode(&d); err != nil {
-		panic(err)
+		return weatherData{}, err
 	}
-	w.Write([]byte(fmt.Sprintf("%+v", d)))
+	return d, nil
 }
