@@ -9,42 +9,59 @@
 
 package main
 
-type Foo struct {
-	Base   string `json:"base"`
-	Clouds struct {
-		All int `json:"all"`
-	} `json:"clouds"`
-	Cod   int `json:"cod"`
-	Coord struct {
-		Lat float64 `json:"lat"`
-		Lon float64 `json:"lon"`
-	} `json:"coord"`
-	Dt   int `json:"dt"`
-	ID   int `json:"id"`
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+type weatherData struct {
 	Main struct {
-		Humidity int     `json:"humidity"`
-		Pressure float64 `json:"pressure"`
-		Temp     float64 `json:"temp"`
-		TempMax  float64 `json:"temp_max"`
-		TempMin  float64 `json:"temp_min"`
+		Temp float64 `json:"temp"`
 	} `json:"main"`
 	Name string `json:"name"`
 	Sys  struct {
-		Country string  `json:"country"`
-		ID      int     `json:"id"`
-		Message float64 `json:"message"`
-		Sunrise int     `json:"sunrise"`
-		Sunset  int     `json:"sunset"`
-		Type    int     `json:"type"`
+		Country string `json:"country"`
 	} `json:"sys"`
-	Weather []struct {
-		Description string `json:"description"`
-		Icon        string `json:"icon"`
-		ID          int    `json:"id"`
-		Main        string `json:"main"`
-	} `json:"weather"`
-	Wind struct {
-		Deg   float64 `json:"deg"`
-		Speed float64 `json:"speed"`
-	} `json:"wind"`
+}
+
+func main() {
+	http.HandleFunc("/weather", getWeather)
+	http.ListenAndServe(":8080", nil)
+}
+
+func getWeather(w http.ResponseWriter, r *http.Request) {
+	//locations := [5]{"spotsylvania", "washington", "chicago", "san francisco", "new york"}
+	res, err := http.Get("http://api.openweathermap.org/data/2.5/weather?q=spotsylvania")
+	if err != nil {
+		panic(err)
+		//return weatherData{}, err
+	}
+	defer res.Body.Close()
+	var d weatherData
+	if err := json.NewDecoder(res.Body).Decode(&d); err != nil {
+		panic(err)
+		//return weatherData{}, err
+	}
+
+	w.Write([]byte(fmt.Sprintf("%+v", d)))
+	//fmt.Printf("%+v\n", d)
+	//fmt.Printf("openWeatherMap: %.2f\n", d.Main.Temp)
+}
+
+func query(city string) (weatherData, error) {
+	resp, err := http.Get("http://api.openweathermap.org/data/2.5/weather?q=spotsylvania")
+	if err != nil {
+		return weatherData{}, err
+	}
+
+	defer resp.Body.Close()
+
+	var d weatherData
+
+	if err := json.NewDecoder(resp.Body).Decode(&d); err != nil {
+		return weatherData{}, err
+	}
+
+	return d, nil
 }
