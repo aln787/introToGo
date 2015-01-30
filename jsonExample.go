@@ -37,10 +37,16 @@ func main() {
 }
 
 func getWeather(w http.ResponseWriter, r *http.Request) {
-	data, err := query("spotsylvania")
-	if err != nil {
-		panic(err)
-	}
+	d := make(chan weatherData)
+	e := make(chan error)
+	go func() {
+		data, err := query("spotsylvania")
+		if err != nil {
+			e <- err
+		}
+		d <- data
+	}()
+	data := <-d
 	w.Write([]byte(fmt.Sprintf("%+v", data)))
 }
 
