@@ -35,18 +35,19 @@ func main() {
 	http.HandleFunc("/weather", getWeather)
 	http.ListenAndServe(":8080", nil)
 }
-
-func getWeather(w http.ResponseWriter, r *http.Request) {
-	d := make(chan weatherData, 2) //Setting the buffer to 2
-	e := make(chan error)
-	go func() {
+func gofunc() {
 		data, err := query("spotsylvania")
 		if err != nil {
 			e <- err
 		}
-		d <- data //Collecting from channel after getting only one value in the channel
-	}()
-	data := <-d
+		d <- data
+	}
+func getWeather(w http.ResponseWriter, r *http.Request) {
+	d := make(chan weatherData, 2) //Setting the buffer to 2
+	e := make(chan error)
+	go ()
+	///switch statement for error
+	data := <-d //Collecting from channel after getting only one value in the channel
 	w.Write([]byte(fmt.Sprintf("%+v", data)))
 }
 
